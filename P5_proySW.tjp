@@ -19,7 +19,8 @@ project pSix "Web Game"  2025-12-15 +5m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2026-02-25-13:00
+  now 2026-04-10-17:00
+  # now 2026-02-25-13:00
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
@@ -67,6 +68,11 @@ resource dev2 "Samantha Müller" {
 }
 resource dev3 "Peter Green" {
   email "kkk@unizar.es"
+}
+
+resource dev4 "Cristina Embid" {
+  email "842102@unizar.es"
+  limits { dailymax 4h }
 }
 
 # Now we specify the work packages. The whole project is described as
@@ -128,7 +134,7 @@ task WMGame "Web & Mobile Game" {
     task tGUId "Web GUI Design" {
       effort 9d
       actual:effort 15d
-      allocate dev3
+      allocate dev3, dev4
       journalentry 2026-01-15 "Problems with the GUI design tool" {
         author dev3
         alert yellow
@@ -137,23 +143,57 @@ task WMGame "Web & Mobile Game" {
     }
     task tFEc "Web Front End Construction" {
       effort 15d
-      allocate dev2, dev3
+      allocate dev2, dev3, dev4
       depends WMGame.twebF.tGUId
+
+      journalentry 2026-04-10 "Error de compatibilidad en navegador" {
+        author dev4
+        alert red
+        summary "La interfaz web no se renderiza correctamente en Safari iOS."
+      }
     }
     task tFEt "Web Front End Test" {
       effort 6d
-      allocate dev1
+      allocate dev4
       depends WMGame.twebF.tFEc
     }    
   }
 
+  task tmobileF "Mobile Front End" {
+    purge chargeset
+    chargeset mFront
+    task tMobDesign "Mobile UI Design" {
+      effort 10d
+      allocate dev2
+    }
+    task tMobDev "Mobile Development" {
+      effort 10d
+      depends !tMobDesign
+      allocate dev3
+    }
+  }
+
+  task tcloud "Cloud Deployment" {
+    task tEval "Cloud Evaluation" {
+      effort 3d
+      allocate boss
+    }
+    task tDeploy "System Deployment" {
+      effort 4d
+      depends !tEval
+      allocate dev1
+    }
+  }
+
   task ttest "Acceptance tests" {
+      start 2026-05-15
       effort 10d
       allocate boss
       allocate dev2
       actual:effort 20d
       depends WMGame.twebF
       depends WMGame.tback
+      depends WMGame.tmobileF
       }
 
     
@@ -223,6 +263,11 @@ textreport frame "" {
     formats html
     center '<[report id="overview"]>'
   }
+
+  textreport initial "Plan Inicial" {
+    formats html
+    center '<[report id="InitialPlan"]>'
+  }
   
   textreport "Status" {
     formats html
@@ -252,6 +297,13 @@ textreport frame "" {
     title "Resource Graph"
     center '<[report id="resourceGraph"]>'
   }
+}
+
+taskreport "InitialPlan" {
+  scenarios plan
+  headline "Planificación Inicial del Proyecto"
+  columns bsi { title 'WBS' }, name, start, end, effort, chart { scale day }
+  hideresource @all
 }
 
 # A traditional Gantt chart with a project overview.
