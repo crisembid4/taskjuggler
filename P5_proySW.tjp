@@ -298,7 +298,7 @@ textreport frame "" {
   }
 }
 
-taskreport "InitialPlan" {
+taskreport InitialPlan "" {
   scenarios plan
   headline "Planificación Inicial del Proyecto"
   columns bsi { title 'WBS' }, name, start, end, effort, chart { scale day }
